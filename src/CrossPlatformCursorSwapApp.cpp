@@ -1,6 +1,8 @@
 #include "cinder/app/AppNative.h"
 #include "cinder/gl/gl.h"
+#if defined( CINDER_MAC )
 #include "Cocoa/Cocoa.h"
+#endif
 
 using namespace ci;
 using namespace ci::app;
@@ -33,13 +35,21 @@ class CrossPlatformCursorSwapApp : public AppNative {
 	bool mHit;
 	Box *mBox;
 	
-
+#if defined( CINDER_MSW )
+	HCURSOR mArrowCursor;
+	HCURSOR mHandCursor;
+#endif
 };
 
 void CrossPlatformCursorSwapApp::setup()
 {
 	mBox = new Box( Rectf( -100, -100, 100, 100 ), Color( 1, 0, 0 ) );
 	mHit = false;
+
+#if defined( CINDER_MSW )
+	mArrowCursor = ::LoadCursor( NULL, IDC_ARROW );
+	mHandCursor = ::LoadCursor( NULL, IDC_HAND );
+#endif
 }
 
 void CrossPlatformCursorSwapApp::mouseMove( MouseEvent event )
@@ -68,14 +78,14 @@ void CrossPlatformCursorSwapApp::changeCursor( CURSOR type )
 #if defined( CINDER_MAC )
 	switch ( type ) {
 		case DEFAULT:	[[NSCursor arrowCursor] set];			break;
-		case HAND :		[[NSCursor pointingHandCursor] set];	break;
+		case HAND:		[[NSCursor pointingHandCursor] set];	break;
 		default:		[[NSCursor arrowCursor] set];			break;
 	}
-#else if #defined( CINDER_MSW )
+#elif defined( CINDER_MSW )
 	switch ( type ) {
-		case DEFAULT:	::SetCursor( ::LoadCursor( NULL, IDC_ARROW ) );	break;
-		case HAND :		::SetCursor( ::LoadCursor( NULL, IDC_HAND ) );	break;
-		default:		::SetCursor( ::LoadCursor( NULL, IDC_ARROW ) );	break;
+		case DEFAULT:	::SetCursor( mArrowCursor );	break;
+		case HAND:		::SetCursor( mHandCursor );		break;
+		default:		::SetCursor( mArrowCursor );	break;
 	}
 #endif
 }
